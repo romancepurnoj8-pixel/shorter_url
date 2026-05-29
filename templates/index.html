@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сокращатель Ссылок & Аналитика</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>✂️ Срезатель Ссылок</h1>
+
+        <p class="subtitle">
+            Сделай ссылку короче и отслеживай клики в реальном времени
+        </p>
+
+        <form action="/shorten" method="POST" class="url-form">
+
+            <input
+                type="url"
+                name="original_url"
+                placeholder="Вставьте длинную ссылку сюда (https://...)"
+                required
+            >
+
+            <button type="submit">
+                Сократить
+            </button>
+
+        </form>
+
+        {% if user_input %}
+        <div class="result-box">
+            <h3>Введённая ссылка:</h3>
+
+            <p>
+                {{ user_input }}
+            </p>
+        </div>
+        {% endif %}
+
+        <div class="stats-section">
+
+            <h2>📈 Активные ссылки</h2>
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Оригинальный URL</th>
+                            <th>Короткая ссылка</th>
+                            <th>Переходы</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for link in links %}
+
+                        <tr>
+
+                            <td class="truncate">
+                                {{ link.original_url }}
+                            </td>
+
+                            <td>
+
+                                <a
+                                    href="/{{ link.short_code }}"
+                                    target="_blank"
+                                    class="short-url"
+                                >
+                                    localhost:5000/{{ link.short_code }}
+                                </a>
+
+                                <button
+                                    class="btn-copy"
+                                    data-clipboard="localhost:5000/{{ link.short_code }}"
+                                >
+                                    📋
+                                </button>
+
+                            </td>
+
+                            <td>
+                                <span class="badge">
+                                    {{ link.clicks_count }}
+                                </span>
+                            </td>
+
+                        </tr>
+
+                        {% else %}
+
+                        <tr>
+                            <td colspan="3" style="text-align: center; color: #888;">
+                                Вы пока не добавили ни одной ссылки.
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
