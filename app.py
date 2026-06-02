@@ -7,15 +7,15 @@ app = Flask(__name__)
 
 def get_db():
     conn = sqlite3.connect("database.db")
-    db.execute(""" CREATE TABLE IF EXISTS users 
-    id INTGER,
-    url TEXT""")
+    conn.execute(""" CREATE TABLE IF NOT EXISTS users 
+    ( 
+    id INTEGER,
+    url TEXT
+    )
+    """)
     conn.commit()
 
-
-def genHESH():
-    hesh = random.randint(10_000_000, 99_999_999)
-    return(hesh)
+get_db()
 
 
 @app.route("/")
@@ -23,23 +23,40 @@ def genHESH():
 def main():
     return render_template("index.html")
 
+import random
+
 @app.route("/shorten", methods=["POST"])
 def submit():
-        url_one = request.form["original_url"]
-        print(url_one)
+    url_one = request.form["original_url"]
 
-        return render_template(
-                "index.html", 
-                user_input=url_one,
-                links=[]
-                 )
+    hesh = random.randint(10000000, 99999999)
+
+    conn = sqlite3.connect("database.db")
+    conn.execute(
+        "INSERT INTO users (id, url) VALUES (?, ?)",
+        (hesh, url_one)
+    )
+    conn.commit()
+    conn.close()
+
+    short_url = f"http://127.0.0.1:5000/{hesh}"
+
+    return render_template(
+        "index.html",
+        user_input=url_one,
+        short_url=short_url
+    )
 
 
 @app.route("/<hesh>")
 def reload(hesh):
-    url = cursor.execute("SELECT url from users WHERE id = ?", 
-            (hesh)
-            )
+    url = cursor.execute(
+            "SELECT url FROM users WHERE id = ?",
+            (hesh,)
+            ).fetchone()
 
+    if url:
+        return redirect(url[0])
+   
 if __name__ == "__main__":
     app.run()
